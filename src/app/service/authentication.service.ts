@@ -10,29 +10,27 @@ import { JwtHelperService } from "@auth0/angular-jwt";
 })
 export class AuthenticationService {
 
-  public host = environment.apiUrl;
+ public host = environment.apiUrl;
  private token: string = '';
  private loggedInUsername: string = '';
  private JwtHelper = new JwtHelperService();
 
   constructor(private http: HttpClient) {}
 
-    public login(user: User): Observable<HttpResponse<any> | HttpErrorResponse> {
-    return this.http.post<HttpResponse<any> | HttpErrorResponse>
-    ('${this.host}/user/login',user,{observe:'response'});
-  } 
+   login(user: User): Observable<HttpResponse<User>> {
+  return this.http.post<User>(`${this.host}/user/login`, user, {
+    observe: 'response'
+  });
+}
 
-  public register(user: User): Observable<HttpResponse<User>> {
+  public register(user: User): Observable<User> {
   return this.http.post<User>(
-    `${this.host}/user/register`,
-    user,
-    { observe: 'response' }
-  );
+    `${this.host}/user/register`, user,);
 }
 
   public logOut(): void {
-    this.token = '';
-    this.loggedInUsername = '';
+    this.token = 'null';
+    this.loggedInUsername = 'null';
     localStorage.removeItem('user');
     localStorage.removeItem('token');
     localStorage.removeItem('users');

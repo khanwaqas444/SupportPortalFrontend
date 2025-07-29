@@ -1,0 +1,84 @@
+/* Basic reset and background */
+body,
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #60a3bc !important;
+}
+
+/* Card container for register form */
+.user_card {
+  height: auto;
+  width: 600px;
+  background: #afbfd8;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  padding: 30px 40px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2),
+              0 6px 20px rgba(0, 0, 0, 0.19);
+  border-radius: 5px;
+}
+
+/* Title styling */
+.user_card h3 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #2C3E50;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Input icon background */
+.input-group-text {
+  background: #184F72 !important;
+  color: white !important;
+  border: 0 !important;
+  border-radius: 0.25rem 0 0 0.25rem !important;
+}
+
+/* Form input fields */
+.form-control {
+  border-left: none;
+  border-radius: 0 0.25rem 0.25rem 0 !important;
+}
+
+/* Remove input focus outlines and shadows */
+.form-control:focus {
+  box-shadow: none !important;
+  outline: 0 !important;
+}
+
+/* Submit button */
+.login_btn {
+  width: 100%;
+  background: #1B4F72 !important;
+  color: white !important;
+}
+
+.login_btn:focus {
+  box-shadow: none !important;
+  outline: 0 !important;
+}
+
+/* Form spacing container */
+.login_container {
+  padding: 0 2rem;
+}
+
+/* Error messages */
+.help-block {
+  font-size: 0.875rem;
+  margin-bottom: 10px;
+  color: red;
+}
+
+/* Responsive fix */
+@media (max-width: 640px) {
+  .user_card {
+    width: 90%;
+    padding: 20px;
+  }
+}

@@ -13,6 +13,8 @@ import { NotificationService } from './service/notification.service';
 import { ComponentLoginComponent } from './component-login/component-login.component';
 import { ComponentRegisterComponent } from './component-register/component-register.component';
 import { ComponentUserComponent } from './component-user/component-user.component';
+import { FormsModule } from '@angular/forms';
+import { NotifierModule } from 'angular-notifier';
 
 @NgModule({
   declarations: [
@@ -23,7 +25,8 @@ import { ComponentUserComponent } from './component-user/component-user.componen
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule,
+    AppRoutingModule,NotifierModule,
+    FormsModule,
     HttpClientModule,
     NotificationModule
   ],
