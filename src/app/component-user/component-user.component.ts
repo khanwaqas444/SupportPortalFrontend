@@ -17,41 +17,53 @@ export class ComponentUserComponent implements OnInit {
   public titleAction$ = this.titleSubject.asObservable();
   public users: User[] = [];
   public refreshing: boolean = false;
+  public selectedUser: User = new User;
   private subscriptions: Subscription[] = [];
+  NotificationService: any;
 
   constructor(private userService: UserService, private notificationService: NotificationService) { }
+
+  
+  ngOnInit(): void {
+    this.getUsers(true);
+  } 
 
   public changeTitle(title: string): void {
     this.titleSubject.next(title);
   }
 
-  // public getUsers(showNotification: boolean): void {
-  //   this.refreshing = true;
-  //   this.subscriptions.push(
-  //     this.userService.getUsers().subscribe(
-  //       next :(response: User[]) => {
-  //         this.userService.addUsersToLocalCache(response);
-  //         this.users = response;
-  //         this.refreshing = false;
-  //         if (showNotification) {
-  //         this.sendNotification(NotificationType.SUCCESS, '${response.length} user(s) loaded successfully.');
-  //         }
-  //       },
-  //       (errorResponse: HttpErrorResponse) => {
-  //         this.sendNotification(NotificationType.ERROR, errorResponse.error.message);
-  //       }
-  //     )
-  //   );
-  // }
+ public getUsers(showNotification: boolean): void {
+  this.refreshing = true;
+  this.subscriptions.push(
+    this.userService.getUsers().subscribe({
+      next: (response: User[]) => {
+        this.userService.addUsersToLocalCache(response);
+        this.users = response;
+        this.refreshing = false;
+        if (showNotification) {
+          this.sendNotification(NotificationType.SUCCESS, `${response.length} user(s) loaded successfully.`);
+        }
+      },
+      error: (errorResponse: HttpErrorResponse) => {
+        this.sendNotification(NotificationType.ERROR, errorResponse.error.message);
+        this.refreshing = false;
+      }
+    })
+  );
+}
 
-  // private  sendNotification(NotificationType: NotificationType, message: string): void {
-  //     if (message) {
-  //       this.NotificationService.notify(NotificationType, message);
-  //     } else {
-  //       this.NotificationService.notify(NotificationType, 'An error occured. Please try again.')
-  //     }
-  //   }
+public onSelectUser(selectedUser: User): void {
+  this.selectedUser = selectedUser;
+  document.getElementById('openUserInfo')?.click();
+}
 
-  ngOnInit(): void {}
+
+  private  sendNotification(NotificationType: NotificationType, message: string): void {
+      if (message) {
+        this.NotificationService.notify(NotificationType, message);
+      } else {
+        this.NotificationService.notify(NotificationType, 'An error occured. Please try again.')
+      }
+    }
 
 }
