@@ -12,6 +12,7 @@ import { map } from 'rxjs/operators';
 export class UserService {
 
   private host = environment.apiUrl;
+  getUsersFromLocalCache: any;
 
   constructor(private http: HttpClient) {}
 

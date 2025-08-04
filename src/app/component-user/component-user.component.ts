@@ -56,11 +56,11 @@ export class ComponentUserComponent implements OnInit {
     );
   }
 
-  public onSelectUser(selectedUser: User): void {
-    this.selectedUser = selectedUser;
-    this.clickButton('new-user-close');
-    document.getElementById('openUserInfo')?.click();
-  }
+public onSelectUser(selectedUser: User): void {
+  this.selectedUser = selectedUser;
+  this.clickButton('openUserInfo');  // Sahi button call
+}
+
 
   public onProfileImageChange(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -100,6 +100,22 @@ export class ComponentUserComponent implements OnInit {
         }
       )
     );
+  }
+
+  public searchUsers(searchTerm: string): void {
+    const results: User[] = [];
+    for(const user of this.userService.getUsersFormLocalCache()) {
+      if (user.firstName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||
+          user.lastName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||
+          user.userName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||
+          user.userId.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1) {
+          results.push(user);
+          }
+    }
+    this.users = results;
+    if (results.length == 0 || !searchTerm) {
+      this.users = this.userService.getUsersFormLocalCache();
+    }
   }
 
   private sendNotification(notificationType: NotificationType, message: string): void {
