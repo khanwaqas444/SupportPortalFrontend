@@ -1,37 +1,69 @@
-/* Basic reset and background */
-body,
-html {
+/* Background and body setup */
+body, html {
   margin: 0;
   padding: 0;
   height: 100%;
   background: #60a3bc !important;
 }
 
-/* Card container for register form */
+/* Card styling */
 .user_card {
-  height: auto;
+  height: 650px;
   width: 600px;
+  margin-top: auto;
+  margin-bottom: auto;
   background: #afbfd8;
   position: relative;
   display: flex;
   justify-content: center;
   flex-direction: column;
-  padding: 30px 40px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2),
-              0 6px 20px rgba(0, 0, 0, 0.19);
+  padding: 10px 30px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 
+              0 6px 20px 0 rgba(0, 0, 0, 0.19);
   border-radius: 5px;
 }
 
-/* Title styling */
-.user_card h3 {
-  font-size: 24px;
-  font-weight: bold;
-  color: #2C3E50;
+/* Optional logo styling */
+.brand_logo_container {
+  position: absolute;
+  height: 170px;
+  width: 170px;
+  top: -75px;
+  border-radius: 50%;
+  background: #60a3bc;
+  padding: 10px;
   text-align: center;
-  margin-bottom: 20px;
 }
 
-/* Input icon background */
+.brand_logo {
+  height: 150px;
+  width: 150px;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+/* Form */
+.form_container {
+  margin-top: 60px;
+}
+
+.login_btn {
+  width: 100%;
+  background: #1B4F72 !important;
+  color: white !important;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.login_btn:focus {
+  box-shadow: none !important;
+  outline: 0px !important;
+}
+
+.login_container {
+  padding: 0 2rem;
+}
+
 .input-group-text {
   background: #184F72 !important;
   color: white !important;
@@ -39,46 +71,22 @@ html {
   border-radius: 0.25rem 0 0 0.25rem !important;
 }
 
-/* Form input fields */
 .form-control {
-  border-left: none;
+  border: 0 !important;
   border-radius: 0 0.25rem 0.25rem 0 !important;
-}
-
-/* Remove input focus outlines and shadows */
-.form-control:focus {
   box-shadow: none !important;
-  outline: 0 !important;
 }
 
-/* Submit button */
-.login_btn {
-  width: 100%;
-  background: #1B4F72 !important;
-  color: white !important;
-}
-
-.login_btn:focus {
-  box-shadow: none !important;
-  outline: 0 !important;
-}
-
-/* Form spacing container */
-.login_container {
-  padding: 0 2rem;
-}
-
-/* Error messages */
 .help-block {
-  font-size: 0.875rem;
-  margin-bottom: 10px;
+  font-size: 13px;
   color: red;
+  margin-bottom: 8px;
 }
 
-/* Responsive fix */
-@media (max-width: 640px) {
-  .user_card {
-    width: 90%;
-    padding: 20px;
-  }
+/* Link style */
+.links a {
+  color: #1B4F72;
+  font-weight: 500;
+  margin-left: 5px;
+  text-decoration: underline;
 }

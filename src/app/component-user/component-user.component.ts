@@ -22,6 +22,8 @@ export class ComponentUserComponent implements OnInit {
   public fileName: string | undefined;
   public profileImage: File | undefined;
   private subscriptions: Subscription[] = [];
+  public editUser = new User();
+  private currentUsername: any;
 
   constructor(
     private userService: UserService,
@@ -81,7 +83,7 @@ public onSelectUser(selectedUser: User): void {
       return;
     }
 
-    const formData = this.userService.createUserFormDate('', userForm.value, this.profileImage);
+    const formData = this.userService.createUserFormData('', userForm.value, this.profileImage);
 
     this.subscriptions.push(
       this.userService.addUser(formData).subscribe(
@@ -92,7 +94,7 @@ public onSelectUser(selectedUser: User): void {
           this.profileImage = undefined;
 
           userForm.reset();
-          this.sendNotification(NotificationType.SUCCESS, '${response.firstName} ${response.lastName} updated successfully');
+          this.sendNotification(NotificationType.SUCCESS, '${response.firstName} ${response.lastName} added successfully');
         },
         (error: HttpErrorResponse) => {
           this.sendNotification(NotificationType.ERROR, error.error.message);
@@ -118,6 +120,31 @@ public onSelectUser(selectedUser: User): void {
     }
   }
 
+  public onUpdateUser(): void {
+    const formData = this.userService.createUserFormData(this.currentUsername, this.editUser, this.profileImage!);
+    this.subscriptions.push(
+      this.userService.updateUser(formData).subscribe(
+        (response) => {
+          this.clickButton('closeEditUserModalButton');
+          this.getUsers(false);
+          this.fileName = undefined;
+          this.profileImage = undefined;
+          this.sendNotification(NotificationType.SUCCESS, '${response.firstName} ${response.lastName} updated successfully');
+        },
+        (error: HttpErrorResponse) => {
+          this.sendNotification(NotificationType.ERROR, error.error.message);
+                    this.profileImage = undefined;
+        }
+      )
+    );
+  }
+
+  public onEditUser(editUser: User): void {
+    this.editUser = editUser;
+    this.currentUsername = editUser.username;
+    this.clickButton('openUserEdit');
+  }
+
   private sendNotification(notificationType: NotificationType, message: string): void {
     if (message) {
       this.notificationService.notify(notificationType, message);
@@ -126,9 +153,24 @@ public onSelectUser(selectedUser: User): void {
     }
   }
 
+  public getFormattedRole(role: string): string {
+  switch(role) {
+    case 'ROLE_ADMIN':
+      return 'Admin';
+    case 'ROLE_MANAGER':
+      return 'Manager';
+    case 'ROLE_USER':
+      return 'User';
+    default:
+      return role;
+  }
+}
+
+
   // ✅ Add this function to fix the error
   public clickButton(buttonId: string): void {
     document.getElementById(buttonId)?.click();
   }
+
 
 }
