@@ -66,7 +66,7 @@ export class UserService {
     formData.append('currentUsername', loggedInUsername);
     formData.append('firstName', user.firstName);
     formData.append('lastName', user.lastName);
-    formData.append('username', user.userName);  // backend expects 'username'
+    formData.append('userName', user.userName);  // backend expects 'username'
     formData.append('email', user.email);
     formData.append('role', user.role);
     formData.append('profileImage', profileImage);

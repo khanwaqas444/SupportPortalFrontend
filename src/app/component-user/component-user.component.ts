@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { User } from '../model/user';
 import { UserService } from '../service/user.service';
 import { NotificationService } from '../service/notification.service';
 import { NotificationType } from '../enum/notification-type.enum';
 import { HttpErrorResponse } from '@angular/common/http';
 import { NgForm } from '@angular/forms';
+import { CustomHttpResponse } from '../model/custom-http-response';
+import { error } from 'console';
 
 @Component({
   selector: 'app-user',
@@ -25,10 +27,17 @@ export class ComponentUserComponent implements OnInit {
   public editUser = new User();
   private currentUsername: any;
 
+   activeTab: string = 'users';
+
+  changeTab(tabName: string) {
+    this.activeTab = tabName;
+    this.changeTitle(tabName);  // If this updates `titleAction$`
+  }
+
   constructor(
     private userService: UserService,
     private notificationService: NotificationService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.getUsers(true);
@@ -58,10 +67,10 @@ export class ComponentUserComponent implements OnInit {
     );
   }
 
-public onSelectUser(selectedUser: User): void {
-  this.selectedUser = selectedUser;
-  this.clickButton('openUserInfo');  // Sahi button call
-}
+  public onSelectUser(selectedUser: User): void {
+    this.selectedUser = selectedUser;
+    this.clickButton('openUserInfo');  // Sahi button call
+  }
 
 
   public onProfileImageChange(event: Event): void {
@@ -98,7 +107,7 @@ public onSelectUser(selectedUser: User): void {
         },
         (error: HttpErrorResponse) => {
           this.sendNotification(NotificationType.ERROR, error.error.message);
-                    this.profileImage = undefined;
+          this.profileImage = undefined;
         }
       )
     );
@@ -106,13 +115,13 @@ public onSelectUser(selectedUser: User): void {
 
   public searchUsers(searchTerm: string): void {
     const results: User[] = [];
-    for(const user of this.userService.getUsersFormLocalCache()) {
+    for (const user of this.userService.getUsersFormLocalCache()) {
       if (user.firstName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||
-          user.lastName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||
-          user.userName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||
-          user.userId.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1) {
-          results.push(user);
-          }
+        user.lastName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||
+        user.userName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||
+        user.userId.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1) {
+        results.push(user);
+      }
     }
     this.users = results;
     if (results.length == 0 || !searchTerm) {
@@ -120,30 +129,91 @@ public onSelectUser(selectedUser: User): void {
     }
   }
 
-  public onUpdateUser(): void {
-    const formData = this.userService.createUserFormData(this.currentUsername, this.editUser, this.profileImage!);
-    this.subscriptions.push(
-      this.userService.updateUser(formData).subscribe(
-        (response) => {
-          this.clickButton('closeEditUserModalButton');
+public onUpdateUser(): void {
+  const formData = this.userService.createUserFormData(
+    this.currentUsername,
+    this.editUser,
+    this.profileImage!
+  );
+
+  this.subscriptions.push(
+    this.userService.updateUser(formData).subscribe({
+      next: (response) => {
+        if (
+          response &&
+          typeof response == 'object' &&
+          'firstName' in response &&
+          'lastName' in response
+        ) {
+          this.clickButton('closeEditUserModalButton'); 
           this.getUsers(false);
           this.fileName = undefined;
           this.profileImage = undefined;
-          this.sendNotification(NotificationType.SUCCESS, '${response.firstName} ${response.lastName} updated successfully');
-        },
-        (error: HttpErrorResponse) => {
-          this.sendNotification(NotificationType.ERROR, error.error.message);
-                    this.profileImage = undefined;
-        }
-      )
-    );
-  }
 
-  public onEditUser(editUser: User): void {
-    this.editUser = editUser;
-    this.currentUsername = editUser.username;
-    this.clickButton('openUserEdit');
+          this.sendNotification(
+            NotificationType.SUCCESS,
+            `${response.firstName}${response.lastName} updated successfully`
+          );
+        } else {
+          this.sendNotification(NotificationType.ERROR, 'Unexpected response received');
+        }
+      },
+      error: (error: HttpErrorResponse) => {
+        this.sendNotification(NotificationType.ERROR, error.error.message || 'Something went wrong');
+        this.profileImage = undefined;
+      }
+    })
+  );
+}
+
+public onResetPassword(emailForm: NgForm): void {
+  this.refreshing = true;
+  const emailAdddress = emailForm.value['']; // ⚠️ This also looks incorrect — see below
+
+  this.subscriptions.push(
+    this.userService.resetPassword(emailAdddress).subscribe(
+      (response) => {
+        this.sendNotification(NotificationType.SUCCESS, response.message);
+        this.refreshing = false;
+      },
+      (error: HttpErrorResponse) => {
+        this.sendNotification(NotificationType.WARNING, error.error.message);
+        this.refreshing = false;
+      },
+      () => emailForm.reset()
+    )
+  );
+}
+
+
+public onDeleteUder(userId: number): void {
+  this.subscriptions.push(
+ this.userService.deleteUser(userId).subscribe({
+  next: (response) => {
+    this.sendNotification(NotificationType.SUCCESS, response.message);
+    this.getUsers(false);
+  },
+  error: (errorResponse: HttpErrorResponse) => {
+    this.sendNotification(NotificationType.ERROR, errorResponse.error?.message || 'Something went wrong.');
   }
+}
+  )
+);
+
+}
+
+
+
+ public onEditUser(editUser: User): void {
+  this.editUser = editUser;
+  this.currentUsername = editUser.userName;
+this.clickButton('openEditUserModalButton');
+}
+
+  public onImgError(event: Event): void {
+  (event.target as HTMLImageElement).src = 'assets/fallback-profile.png';
+}
+
 
   private sendNotification(notificationType: NotificationType, message: string): void {
     if (message) {
@@ -154,20 +224,18 @@ public onSelectUser(selectedUser: User): void {
   }
 
   public getFormattedRole(role: string): string {
-  switch(role) {
-    case 'ROLE_ADMIN':
-      return 'Admin';
-    case 'ROLE_MANAGER':
-      return 'Manager';
-    case 'ROLE_USER':
-      return 'User';
-    default:
-      return role;
+    switch (role) {
+      case 'ROLE_ADMIN':
+        return 'Admin';
+      case 'ROLE_MANAGER':
+        return 'Manager';
+      case 'ROLE_USER':
+        return 'User';
+      default:
+        return role;
+    }
   }
-}
 
-
-  // ✅ Add this function to fix the error
   public clickButton(buttonId: string): void {
     document.getElementById(buttonId)?.click();
   }

@@ -8,7 +8,7 @@ import { NotificationType } from '../enum/notification-type.enum';
 export class AuthenticationGuard implements CanActivate {
 
   constructor(private  authenticationService: AuthenticationService, private router: Router,
-    private notificationService: NotificationService) {}
+              private notificationService: NotificationService) {}
 
   canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
     return this.isUserLoggedIn();
@@ -20,7 +20,7 @@ export class AuthenticationGuard implements CanActivate {
       }
 
     this.router.navigate(['/login']); 
-    this.notificationService.notify(NotificationType.ERROR, 'you need to log in to access this page'.toUpperCase());
+    this.notificationService.notify(NotificationType.ERROR, 'you need to log in to access this page');
     return false;
   }
 }
