@@ -6,8 +6,10 @@ import { NotificationService } from '../service/notification.service';
 import { NotificationType } from '../enum/notification-type.enum';
 import { HttpErrorResponse } from '@angular/common/http';
 import { NgForm } from '@angular/forms';
-import { CustomHttpResponse } from '../model/custom-http-response';
 import { error } from 'console';
+import { AuthenticationService } from '../service/authentication.service';
+import { CustomHttpResponse } from '../model/custom-http-response';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-user',
@@ -21,25 +23,28 @@ export class ComponentUserComponent implements OnInit {
   public users: User[] = [];
   public refreshing: boolean = false;
   public selectedUser: User = new User();
+  public usser : User | undefined;
   public fileName: string | undefined;
   public profileImage: File | undefined;
   private subscriptions: Subscription[] = [];
   public editUser = new User();
   private currentUsername: any;
+  public fileStatus: { status: string; percentage: number } | null = null;
+
 
    activeTab: string = 'users';
+  user: User | null | undefined;
 
   changeTab(tabName: string) {
     this.activeTab = tabName;
-    this.changeTitle(tabName);  // If this updates `titleAction$`
+    this.changeTitle(tabName); 
   }
 
-  constructor(
-    private userService: UserService,
-    private notificationService: NotificationService
-  ) { }
+  constructor(private router: Router, private authenticationService: AuthenticationService,
+              private userService: UserService, private notificationService: NotificationService) {}
 
   ngOnInit(): void {
+    this.user = this.authenticationService.getUserFromLocalCache();
     this.getUsers(true);
   }
 
@@ -166,6 +171,42 @@ public onUpdateUser(): void {
   );
 }
 
+
+public onUpdateCurrentUser(user: User): void {
+  this.refreshing = true;
+  this.currentUsername = this.authenticationService.getUserFromLocalCache()?.username;
+  const formData = this.userService.createUserFormData(this.currentUsername, user, this.profileImage!);
+  this.subscriptions.push(
+  this.userService.updateUser(formData).subscribe(
+    (response: User) => {
+      this.authenticationService.addUserToLocalCache(response);
+      this.getUsers(false);
+      this.fileName = undefined;
+      this.profileImage = undefined;
+      this.sendNotification(
+    NotificationType.SUCCESS,
+    `${response.firstName} ${response.lastName} updated successfully`
+  );
+},
+    (errorResponse: HttpErrorResponse) => {
+      this.sendNotification(NotificationType.ERROR, errorResponse.error.message);
+      this.refreshing = true;
+      this.profileImage = undefined;
+    }
+  )
+);
+}
+
+public updateProfileImage(): void {
+  this.clickButton('profile-image-input');
+}
+
+public onLogOut(): void {
+  this.authenticationService.logOut();
+  this.router.navigate(['/login']);
+  this.sendNotification(NotificationType.SUCCESS, `You've been successfuly logged out`);
+}
+
 public onResetPassword(emailForm: NgForm): void {
   this.refreshing = true;
   const emailAdddress = emailForm.value['']; // ⚠️ This also looks incorrect — see below
@@ -185,24 +226,19 @@ public onResetPassword(emailForm: NgForm): void {
   );
 }
 
-
-public onDeleteUder(userId: number): void {
+public onDeleteUser(userId: number): void {
   this.subscriptions.push(
- this.userService.deleteUser(userId).subscribe({
-  next: (response) => {
-    this.sendNotification(NotificationType.SUCCESS, response.message);
-    this.getUsers(false);
-  },
-  error: (errorResponse: HttpErrorResponse) => {
-    this.sendNotification(NotificationType.ERROR, errorResponse.error?.message || 'Something went wrong.');
-  }
+    this.userService.deleteUser(userId).subscribe(
+      (response) => {
+        this.sendNotification(NotificationType.SUCCESS, response.message);
+        this.getUsers(true);
+      },
+      (error: HttpErrorResponse) => {
+        this.sendNotification(NotificationType.ERROR, error.error.message);
+      }
+    )
+  );
 }
-  )
-);
-
-}
-
-
 
  public onEditUser(editUser: User): void {
   this.editUser = editUser;

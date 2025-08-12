@@ -32,9 +32,10 @@ export class UserService {
     return this.http.post<User>(`${this.host}/user/add`, formData);
   }
 
-  public updateUser(formData: FormData): Observable<User | HttpErrorResponse> {
-    return this.http.post<User>(`${this.host}/user/update`, formData);
-  }
+  updateUser(formData: FormData): Observable<User> {
+  return this.http.post<User>(`${this.host}/user/update`, formData);
+}
+
 
   public resetPassword(email: string): Observable<CustomHttpResponse | HttpErrorResponse> {
     return this.http.get<CustomHttpResponse>(`${this.host}/user/resetPassword/${email}`);
