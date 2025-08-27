@@ -25,6 +25,7 @@ export class AuthInterceptor implements HttpInterceptor {
     if (httprequest.url.includes('${this.authenticationService.host}/user/resetpassword')){
         return httpHandler.handle(httprequest);
     }
+    
     this.authenticationService.loadToken();
     const token = this.authenticationService.getToken();
     const request = httprequest.clone({ setHeaders: { Authorization: 'Bearer ${token}'}});
